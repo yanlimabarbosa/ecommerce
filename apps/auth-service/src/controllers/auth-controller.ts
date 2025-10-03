@@ -8,7 +8,11 @@ import {
   validateRegistrationData,
 } from "../utils/auth.helper"
 
-export const userRegistration = async (req: Request, res: Response, next: NextFunction) => {
+export const userRegistration = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     validateRegistrationData(req.body, "user")
 
@@ -24,7 +28,9 @@ export const userRegistration = async (req: Request, res: Response, next: NextFu
     await trackOtpRequests(email, next)
     await sendOtp({ name, email, templateName: "user-activation-mail" })
 
-    res.status(200).json({ message: "OTP sent to your email. Please verify your account." })
+    res
+      .status(200)
+      .json({ message: "OTP sent to your email. Please verify your account." })
   } catch (err) {
     next(err)
   }

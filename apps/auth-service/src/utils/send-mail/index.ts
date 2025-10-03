@@ -15,7 +15,12 @@ type SendEmailParams = {
   data: Record<string, any>
 }
 
-export const sendEmail = async ({ to, subject, templateName, data }: SendEmailParams) => {
+export const sendEmail = async ({
+  to,
+  subject,
+  templateName,
+  data,
+}: SendEmailParams) => {
   try {
     const html = await renderEmailTemplate(templateName, data)
 
