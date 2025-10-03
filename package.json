@@ -22,7 +22,8 @@
     "express-http-proxy": "^2.1.2",
     "ioredis": "^5.8.0",
     "nodemailer": "^7.0.6",
-    "prisma": "^6.16.2"
+    "prisma": "^6.16.2",
+    "swagger-autogen": "^2.23.7"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",

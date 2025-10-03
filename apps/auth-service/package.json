@@ -20,7 +20,17 @@
           "main": "apps/auth-service/src/main.ts",
           "tsConfig": "apps/auth-service/tsconfig.app.json",
           "assets": [
-            "apps/auth-service/src/assets"
+            "apps/auth-service/src/assets",
+            {
+              "input": "apps/auth-service/src",
+              "glob": "swagger-output.json",
+              "output": "apps/auth-service/src"
+            },
+            {
+              "input": "apps/auth-service/src/utils",
+              "glob": "email-templates/**/*",
+              "output": "apps/auth-service/src/utils"
+            }
           ],
           "esbuildOptions": {
             "sourcemap": true,
