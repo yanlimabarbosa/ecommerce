@@ -52,7 +52,7 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 100,
+    "lineWidth": 80,
     "attributePosition": "auto",
     "bracketSpacing": true
   },
@@ -481,7 +481,7 @@
   "css": {
     "formatter": {
       "lineEnding": "lf",
-      "lineWidth": 100,
+      "lineWidth": 80,
       "quoteStyle": "single"
     },
     "parser": {
@@ -498,7 +498,7 @@
       "indentStyle": "space",
       "indentWidth": 2,
       "lineEnding": "lf",
-      "lineWidth": 100,
+      "lineWidth": 80,
       "trailingCommas": "none"
     },
     "parser": {
@@ -547,7 +547,7 @@
             "noExcessiveCognitiveComplexity": "off"
           },
           "suspicious": {
-            "noConsole": "off",
+            "noConsole": "warn",
             "noExplicitAny": "off"
           }
         }
