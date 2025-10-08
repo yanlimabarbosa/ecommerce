@@ -46,6 +46,7 @@ const renderEmailTemplate = async (
 ): Promise<string> => {
   const templatePath = path.join(
     process.cwd(),
+    "apps",
     "auth-service",
     "src",
     "utils",
@@ -53,7 +54,7 @@ const renderEmailTemplate = async (
     `${templateName}.ejs`
   )
 
-  return await ejs.render(templatePath, data)
+  return await ejs.renderFile(templatePath, data)
 }
 
 const transporter = nodeMailer.createTransport({
