@@ -6,10 +6,10 @@
     "version": "1.0.0"
   },
   "host": "localhost:6001",
-  "basePath": "/",
+  "basePath": "/api",
   "schemes": ["http"],
   "paths": {
-    "/api/user-registration": {
+    "/user-registration": {
       "post": {
         "description": "",
         "parameters": [
@@ -20,13 +20,10 @@
               "type": "object",
               "properties": {
                 "name": {
-                  "example": "Yan Lima Barbosa"
+                  "example": "any"
                 },
                 "email": {
-                  "example": "yanlimabarbosa16@gmail.com"
-                },
-                "password": {
-                  "example": "password"
+                  "example": "any"
                 }
               }
             }
@@ -35,6 +32,39 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/verify-user": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "otp": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                },
+                "name": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
           }
         }
       }
