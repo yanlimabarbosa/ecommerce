@@ -23,11 +23,11 @@ export const userRegistration = async (
     const existingUser = await prisma.users.findUnique({ where: { email } })
 
     if (existingUser) {
-      return next(new ValidationError("User with this email already exists."))
+      throw new ValidationError("User with this email already exists.")
     }
 
-    await checkOtpRestrictions(email, next)
-    await trackOtpRequests(email, next)
+    await checkOtpRestrictions(email)
+    await trackOtpRequests(email)
     await sendOtp({ name, email, templateName: "user-activation-mail" })
 
     res
@@ -46,16 +46,16 @@ export const verifyUser = async (
   try {
     const { email, otp, password, name } = req.body
     if (!(email && otp && password && name)) {
-      return next(new ValidationError("All fields are required!"))
+      throw new ValidationError("All fields are required!")
     }
 
     const existingUser = await prisma.users.findUnique({ where: { email } })
 
     if (existingUser) {
-      return next(new ValidationError("User already exists with this email! "))
+      throw new ValidationError("User already exists with this email! ")
     }
 
-    await verifyOtp({ email, otp, next })
+    await verifyOtp({ email, otp })
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
