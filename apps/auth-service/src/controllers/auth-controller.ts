@@ -6,9 +6,12 @@ import { env } from "../../../../packages/libs/env-validator"
 import prisma from "../../../../packages/libs/prisma"
 import {
   checkOtpRestrictions,
+  handleForgotPassword,
+  handleResetUserPassword,
   sendOtp,
   trackOtpRequests,
   validateRegistrationData,
+  verifyForgotPasswordOtp,
   verifyOtp,
 } from "../utils/auth.helper"
 import { setCookie } from "../utils/cookies/setCookie"
@@ -125,4 +128,28 @@ export const loginUser = async (
   } catch (error) {
     return next(error)
   }
+}
+
+export const userForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await handleForgotPassword(req, res, next)
+}
+
+export const verifyUserForgotPasswordOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await verifyForgotPasswordOtp(req, res, next)
+}
+
+export const resetUserPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await handleResetUserPassword(req, res, next)
 }

@@ -1,5 +1,8 @@
 import crypto from "node:crypto"
+import bcrypt from "bcryptjs"
+import type { NextFunction, Request, Response } from "express"
 import { ValidationError } from "../../../../packages/error-handler"
+import prisma from "../../../../packages/libs/prisma"
 import redis from "../../../../packages/libs/reddis"
 import { sendEmail } from "./send-mail"
 
@@ -84,9 +87,10 @@ export const sendOtp = async ({ name, email, templateName }: SendOtpParams) => {
 type VerifyOtpParams = {
   email: string
   otp: string
+  next: NextFunction
 }
 
-export const verifyOtp = async ({ email, otp }: VerifyOtpParams) => {
+export const verifyOtp = async ({ email, otp, next }: VerifyOtpParams) => {
   const storedOtp = await redis.get(`otp:${email}`)
 
   if (storedOtp !== otp) {
@@ -111,4 +115,105 @@ export const verifyOtp = async ({ email, otp }: VerifyOtpParams) => {
   }
 
   await redis.del(`otp:${email}`, failedAttemptsKey)
+}
+
+export const handleForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body
+
+    if (!email) {
+      throw new ValidationError("Email is required!")
+    }
+
+    const user = await prisma.users.findUnique({ where: { email } })
+
+    if (!user) {
+      throw new ValidationError("User not found with this email!")
+    }
+
+    await checkOtpRestrictions(email)
+    await trackOtpRequests(email)
+
+    await sendOtp({
+      name: user.name,
+      email,
+      templateName: "forgot-password-user-mail",
+    })
+
+    res
+      .status(200)
+      .json({ message: "OTP sent to your email. Please check your inbox." })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const handleResetUserPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, otp, newPassword } = req.body
+
+    if (!(email && otp && newPassword)) {
+      throw new ValidationError("All fields are required!")
+    }
+
+    const user = await prisma.users.findUnique({ where: { email } })
+
+    if (!user) {
+      throw new ValidationError("User not found with this email!")
+    }
+
+    const passwordMatches = await bcrypt.compare(
+      newPassword,
+      user.password ?? ""
+    )
+
+    if (passwordMatches) {
+      return next(
+        new ValidationError(
+          "New password must be different from the old password!"
+        )
+      )
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    await prisma.users.update({
+      where: { email },
+      data: { password: hashedPassword },
+    })
+
+    res.status(200).json({ message: "Password reset successfully!" })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const verifyForgotPasswordOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, otp } = req.body
+
+    if (!(email && otp)) {
+      throw new ValidationError("Email and OTP are required!")
+    }
+
+    await verifyOtp({ email, otp, next })
+
+    res
+      .status(200)
+      .json({ message: "OTP verified, you can now reset your password." })
+  } catch (error) {
+    return next(error)
+  }
 }
