@@ -1,4 +1,3 @@
-import axios from "axios"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import express, { type Request } from "express"
