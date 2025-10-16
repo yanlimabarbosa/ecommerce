@@ -384,7 +384,7 @@
         "noCompareNegZero": "error",
         "noConfusingLabels": "error",
         "noConfusingVoidType": "error",
-        "noConsole": "error",
+        "noConsole": "warn",
         "noConstEnum": "error",
         "noControlCharactersInRegex": "error",
         "noDebugger": "error",
@@ -513,6 +513,11 @@
     "defaultBranch": "main"
   },
   "overrides": [
+    {
+      "includes": ["mongo-init/init.js"],
+      "linter": { "enabled": false },
+      "formatter": { "enabled": false }
+    },
     {
       "includes": [
         "*.config.{js,ts,mjs,cjs,mts,cts}",
