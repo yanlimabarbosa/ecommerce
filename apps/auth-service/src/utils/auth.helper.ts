@@ -87,10 +87,9 @@ export const sendOtp = async ({ name, email, templateName }: SendOtpParams) => {
 type VerifyOtpParams = {
   email: string
   otp: string
-  next: NextFunction
 }
 
-export const verifyOtp = async ({ email, otp, next }: VerifyOtpParams) => {
+export const verifyOtp = async ({ email, otp }: VerifyOtpParams) => {
   const storedOtp = await redis.get(`otp:${email}`)
 
   if (storedOtp !== otp) {
@@ -208,7 +207,7 @@ export const verifyForgotPasswordOtp = async (
       throw new ValidationError("Email and OTP are required!")
     }
 
-    await verifyOtp({ email, otp, next })
+    await verifyOtp({ email, otp })
 
     res
       .status(200)
