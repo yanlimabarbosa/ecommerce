@@ -8,3 +8,74 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     restart: always
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    command: [
+      "mongod",
+      "--replSet", "${MONGO_REPLICA_SET_NAME:-rs0}",
+      "--bind_ip_all",
+      "--auth",
+      "--keyFile", "/etc/mongo-keyfile/keyfile"
+    ]
+    volumes:
+      - mongo-data:/data/db
+      - mongo-keyfile:/etc/mongo-keyfile:ro
+    depends_on:
+      - keyfile-seed
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet -u \"$MONGO_INITDB_ROOT_USERNAME\" -p \"$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval \"db.adminCommand({ ping: 1 })\" || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+
+  mongo-setup:
+    image: mongo:7.0
+    container_name: mongo-setup
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - MONGO_APP_USER=${MONGO_APP_USER}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+      - MONGO_REPLICA_SET_NAME=${MONGO_REPLICA_SET_NAME:-rs0}
+      - MONGO_PRIMARY=mongodb:27017
+    volumes:
+      - ./mongo-init/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    entrypoint: [
+      "mongosh",
+      "--host", "mongodb:27017",
+      "-u", "${MONGO_INITDB_ROOT_USERNAME}",
+      "-p", "${MONGO_INITDB_ROOT_PASSWORD}",
+      "--authenticationDatabase", "admin",
+      "/docker-entrypoint-initdb.d/init.js"
+    ]
+    restart: "no"
+
+  keyfile-seed:
+    image: mongo:7.0
+    container_name: mongo-keyfile-seed
+    command: ["bash", "-lc", "set -e; mkdir -p /key; cp /seed/keyfile /key/keyfile; chown 999:999 /key/keyfile; chmod 600 /key/keyfile"]
+    volumes:
+      - ./mongodb-keyfile/keyfile:/seed/keyfile:ro
+      - mongo-keyfile:/key
+    restart: "no"
+
+volumes:
+  mongo-data:
+  mongo-keyfile:
